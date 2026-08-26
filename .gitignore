@@ -3,3 +3,4 @@
 conf.json
 test.py
 test*
+__pycache__
