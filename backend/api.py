@@ -10,7 +10,28 @@ import lib.settings as settings
 
 
 app = Flask(__name__)
-veilance_v1 = Blueprint("veilance_v1", __name__, url_prefix="/api/v1")
+veilance_public_v1 = Blueprint("veilance_public_v1", __name__, url_prefix="/api/v1")
+veilance_users_v1 = Blueprint("veilance_users_v1", __name__, url_prefix="/api/users/v1")
+veilance_admin_v1 = Blueprint("veilance_admin_v1", __name__, url_prefix="/api/admin/v1")
+
+
+def default_request_limits():
+    try:
+        if request.is_json:
+             data = request.get_json(force=True, silent=True) or {}
+             client_id = data.get("client_id", None)
+        else:
+            client_id = request.form.get("client_id", None)
+    except:
+        client_id = None
+    use_ip = False
+    if client_id is None:
+        use_ip = True
+    if use_ip:
+        return f"ip:{settings.get_client_ip(request, get_remote_address)}"
+    else:
+        token_hash = settings.get_hash(client_id)
+        return f"tok:{token_hash}"
 
 
 def parse_telemetry_json(data):
@@ -22,7 +43,50 @@ def parse_telemetry_json(data):
     return True, None
 
 
-@veilance_v1.route("/telemetry/ip", methods=["GET"])
+conf = settings.load_conf()
+limiter = Limiter(
+    app=app,
+    key_func=default_request_limits,
+    default_limits=["50 per second"],
+    storage_uri=f"redis://{conf['redis']['host']}:{conf['redis']['port']}/{conf['redis']['database']}",
+    key_prefix="veilance-limiter"
+)
+
+
+@app.errorhandler(429)
+def handler_429(_):
+    return settings.build_json_report(None, is_error=True, error_string="Hit request rate limit"), 429
+
+
+@app.errorhandler(Exception)
+def handler_exception(error):
+    return settings.build_json_report(None, is_error=True, error_string="Internal server error"), 500
+
+
+@app.route("/", methods=["GET", "POST"])
+def public_home():
+    return settings.build_json_report({
+        "version": settings.VERSION,
+        "title": "Veilance Intelligence Network API",
+        "documentation_link": "https://github.com/VeilanceApp/Veilance-API",
+        "description": "Shared opt-in intelligence network from the Veilance browser extension",
+        "install_links": {
+            "firefox": None,
+            "chromium": "https://chromewebstore.google.com/detail/veilance/jnpdghabfaeceighkogelpmaeplcmddb?hl=en&authuser=2",
+            "edge": None
+        },
+        "status": "online"
+    })
+
+
+@veilance_public_v1.route("/token/check", methods=["POST"])
+@veilance_users_v1.route("/token/check", methods=["POST"])
+@veilance_admin_v1.route("/token/check", methods=["POST"])
+def check_login_token():
+    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+
+
+@veilance_public_v1.route("/telemetry/ip", methods=["GET"])
 def get_client_ip_address():
     try:
         ip_address = settings.get_client_ip(request, get_remote_address)
@@ -34,7 +98,7 @@ def get_client_ip_address():
     })
 
 
-@veilance_v1.route("/telemetry/upload", methods=["POST"])
+@veilance_public_v1.route("/telemetry/upload", methods=["POST"])
 def upload_telemetry():
     ip_address = request.form.get("ip_address")
     telemetry_file = request.files.get("telemetry")
@@ -85,3 +149,23 @@ def upload_telemetry():
         })
     else:
         return settings.build_json_report(None, is_error=True, error_string="Unable to upload telemetry data")
+
+
+@veilance_users_v1.route("/register", methods=["POST"])
+def user_registration():
+    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+
+
+@veilance_users_v1.route("/login", methods=["POST"])
+def user_login():
+    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+
+
+@veilance_admin_v1.route("/login", methods=["POST"])
+def admin_login():
+    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+
+
+@veilance_admin_v1.route("/payout", methods=["POST"])
+def admin_perform_payout():
+    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")

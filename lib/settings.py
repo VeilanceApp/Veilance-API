@@ -1,10 +1,11 @@
-import os
 import json
 import uuid
-import random
 import hashlib
 import ipaddress
 import datetime
+
+
+VERSION = "0.0.1"
 
 
 def load_conf():
