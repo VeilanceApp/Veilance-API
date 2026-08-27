@@ -34,6 +34,20 @@ def default_request_limits():
         return f"tok:{token_hash}"
 
 
+def telemetry_upload_request_limit():
+    try:
+        _id = request.form.get("client_id", None)
+    except:
+        _id = None
+    use_ip = False
+    if _id is None:
+        use_ip = True
+    if use_ip:
+        return f"ip:{settings.get_client_ip(request, get_remote_address)}"
+    else:
+        return f"client:{_id}"
+
+
 def parse_telemetry_json(data):
     expected_keys = ('schemaVersion', 'batchId', 'contributorId', 'observations')
     if any(s not in data.keys() for s in list(expected_keys)):
@@ -99,6 +113,7 @@ def get_client_ip_address():
 
 
 @veilance_public_v1.route("/telemetry/upload", methods=["POST"])
+@limiter.limit("1000 per day", key_func=telemetry_upload_request_limit)
 def upload_telemetry():
     ip_address = request.form.get("ip_address")
     telemetry_file = request.files.get("telemetry")
