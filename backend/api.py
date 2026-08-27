@@ -13,6 +13,25 @@ app = Flask(__name__)
 veilance_v1 = Blueprint("veilance_v1", __name__, url_prefix="/api/v1")
 
 
+def default_request_limits():
+    try:
+        if request.is_json:
+             data = request.get_json(force=True, silent=True) or {}
+             client_id = data.get("client_id", None)
+        else:
+            client_id = request.form.get("client_id", None)
+    except:
+        client_id = None
+    use_ip = False
+    if client_id is None:
+        use_ip = True
+    if use_ip:
+        return f"ip:{settings.get_client_ip(request, get_remote_address)}"
+    else:
+        token_hash = settings.get_hash(str(client_id).encode())
+        return f"tok:{token_hash}"
+
+
 def parse_telemetry_json(data):
     expected_keys = ('schemaVersion', 'batchId', 'contributorId', 'observations')
     if any(s not in data.keys() for s in list(expected_keys)):
@@ -20,6 +39,16 @@ def parse_telemetry_json(data):
     if len(data.keys()) == 0:
         return False, "Invalid telemetry JSON"
     return True, None
+
+
+conf = settings.load_conf()
+limiter = Limiter(
+    app=app,
+    key_func=default_request_limits,
+    default_limits=["25 per second"],
+    storage_uri=f"redis://{conf['redis']['host']}:{conf['redis']['port']}/{conf['redis']['database']}",
+    key_prefix="veilance-limiter"
+)
 
 
 @veilance_v1.route("/telemetry/ip", methods=["GET"])
