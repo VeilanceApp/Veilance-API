@@ -154,7 +154,8 @@ def upload_telemetry():
     if domain_name is None:
         return settings.build_json_report(None, is_error=True, error_string="Domain name cannot be empty")
     dedupe_key = settings.get_hash(domain_name)
-    exists = sql.find_telemetry_by_deduplication_key(dedupe_key)
+    # exists = sql.find_telemetry_by_deduplication_key(dedupe_key)
+    exists = None
     if exists is not None:
         return settings.build_json_report(None, is_error=True, error_string="This telemetry data has already been uploaded")
     is_inserted = sql.upload_telemetry(ip_address, raw_telemetry_data, client_id, wallet_address, dedupe_key)
