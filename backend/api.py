@@ -100,6 +100,21 @@ def check_login_token():
     return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
 
 
+@veilance_public_v1.route("/leaderboard", methods=["GET"])
+@limiter.limit("3 per second")
+def veilance_telemetry_leaderboard():
+    results = sql.get_leaderboard()
+    if results is None:
+        return settings.build_json_report(None, is_error=True, error_string="No leaderboard data found")
+    for item in results:
+        client_id = item['client_id']
+        # redact the client_id from public view
+        client_id = f"{client_id[0:5]}*****{client_id[-5:-1]}"
+        del item['client_id']
+        item['client_id'] = client_id
+    return settings.build_json_report(results)
+
+
 @veilance_public_v1.route("/telemetry/ip", methods=["GET"])
 def get_client_ip_address():
     try:
@@ -154,7 +169,8 @@ def upload_telemetry():
     if domain_name is None:
         return settings.build_json_report(None, is_error=True, error_string="Domain name cannot be empty")
     dedupe_key = settings.get_hash(domain_name)
-    exists = sql.find_telemetry_by_deduplication_key(dedupe_key)
+    # exists = sql.find_telemetry_by_deduplication_key(dedupe_key)
+    exists = None
     if exists is not None:
         return settings.build_json_report(None, is_error=True, error_string="This telemetry data has already been uploaded")
     is_inserted = sql.upload_telemetry(ip_address, raw_telemetry_data, client_id, wallet_address, dedupe_key)
