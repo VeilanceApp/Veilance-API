@@ -100,6 +100,21 @@ def check_login_token():
     return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
 
 
+@veilance_public_v1.route("/leaderboard", methods=["GET"])
+@limiter.limit("3 per second")
+def veilance_telemetry_leaderboard():
+    results = sql.get_leaderboard()
+    if results is None:
+        return settings.build_json_report(None, is_error=True, error_string="No leaderboard data found")
+    for item in results:
+        client_id = item['client_id']
+        # redact the client_id from public view
+        client_id = f"{client_id[0:5]}*****{client_id[-5:-1]}"
+        del item['client_id']
+        item['client_id'] = client_id
+    return settings.build_json_report(results)
+
+
 @veilance_public_v1.route("/telemetry/ip", methods=["GET"])
 def get_client_ip_address():
     try:

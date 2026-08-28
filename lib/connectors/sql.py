@@ -62,3 +62,56 @@ def upload_telemetry(ip_address, raw_json, client_id, wallet_address, deduplicat
         return True
     except:
         return False
+
+
+def get_leaderboard():
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['telemetry']]
+    try:
+        pipeline = [
+            {
+                "$match": {
+                    "client_id": {
+                        "$ne": None
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$client_id",
+                    "telemetry_count": {
+                        "$sum": 1
+                    },
+                    "payout_amount": {
+                        "$sum": {
+                            "$ifNull": ["$payout_amount", 0]
+                        }
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "telemetry_count": -1
+                }
+            },
+            {
+                "$limit": 50
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "client_id": "$_id",
+                    "telemetry_count": 1,
+                    "payout_amount": 1
+                }
+            }
+        ]
+        results = list(collection.aggregate(pipeline))
+        for rank, item in enumerate(results, start=1):
+            item["rank"] = rank
+        return results
+
+    except:
+        return None
