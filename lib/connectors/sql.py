@@ -132,26 +132,27 @@ def get_all_active_telemetry():
 def get_leaderboard():
     conf = settings.load_conf()
     client = get_client()
-    db = client[conf['database']['name']]
-    collection = db[conf['database']['collections']['telemetry']]
+    db = client[conf["database"]["name"]]
+    collection = db[conf["database"]["collections"]["telemetry"]]
     try:
         pipeline = [
             {
                 "$match": {
-                    "client_id": {
-                        "$ne": None
-                    }
+                    "client_id": {"$ne": None}
                 }
             },
             {
                 "$group": {
                     "_id": "$client_id",
-                    "telemetry_count": {
-                        "$sum": 1
-                    },
+                    "telemetry_count": {"$sum": 1},
                     "payout_amount": {
                         "$sum": {
-                            "$ifNull": ["$payout_amount", 0]
+                            "$convert": {
+                                "input": "$payout_amount",
+                                "to": "double",
+                                "onError": 0,
+                                "onNull": 0
+                            }
                         }
                     }
                 }
@@ -161,9 +162,7 @@ def get_leaderboard():
                     "telemetry_count": -1
                 }
             },
-            {
-                "$limit": 50
-            },
+            {"$limit": 50},
             {
                 "$project": {
                     "_id": 0,
@@ -177,6 +176,5 @@ def get_leaderboard():
         for rank, item in enumerate(results, start=1):
             item["rank"] = rank
         return results
-
     except:
-        return None
+        return []
