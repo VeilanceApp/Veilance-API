@@ -64,6 +64,71 @@ def upload_telemetry(ip_address, raw_json, client_id, wallet_address, deduplicat
         return False
 
 
+@sanitize("telemetry_id", "payout_amount")
+def accept_telemetry(telemetry_id, payout_amount):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['telemetry']]
+    try:
+        _filter = {"telemetry_id": telemetry_id}
+        update = {
+            "$set": {
+                "is_accepted": True,
+                "accepted_on": datetime.datetime.now(tz=datetime.timezone.utc).isoformat(),
+                "payout_amount": payout_amount,
+            }
+        }
+        result = collection.update_one(_filter, update)
+        return result.modified_count == 1
+    except:
+        return False
+
+
+@sanitize("telemetry_id", "rejected_reasoning")
+def deny_telemetry(telemetry_id, rejected_reasoning):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['telemetry']]
+    try:
+        _filter = {"telemetry_id": telemetry_id}
+        update = {
+            "$set": {
+                "rejected_on": datetime.datetime.now(tz=datetime.timezone.utc).isoformat(),
+                "rejected_reason": rejected_reasoning,
+                "is_rejected": True
+            }
+        }
+        result = collection.update_one(_filter, update)
+        return result.modified_count == 1
+    except:
+        return False
+
+
+def get_all_active_telemetry():
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf["database"]["name"]]
+    collection = db[conf["database"]["collections"]["telemetry"]]
+    try:
+        return list(
+            collection.find(
+                {
+                    "is_accepted": False,
+                    "is_rejected": False
+                },
+                {
+                    "_id": 0,
+                    "uploaded_from": 0,
+                    "deduplication_key": 0
+                }
+            ).sort("uploaded_on", 1)
+        )
+    except Exception:
+        return []
+
+
 def get_leaderboard():
     conf = settings.load_conf()
     client = get_client()
