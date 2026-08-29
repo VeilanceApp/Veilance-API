@@ -1,8 +1,13 @@
+import base64
 import json
+import os
+import random
 import uuid
 import hashlib
 import ipaddress
 import datetime
+
+from itsdangerous import URLSafeTimedSerializer
 
 
 VERSION = "0.0.1"
@@ -131,3 +136,54 @@ def get_client_ip(req, fallback_func):
     if ip:
         return ip
     return None
+
+
+def make_admin_serial():
+    secret = load_conf()['user_config']['admin_secret']
+    return URLSafeTimedSerializer(secret)
+
+
+def make_user_serial():
+    secret = load_conf()['user_config']['user_secret']
+    return URLSafeTimedSerializer(secret)
+
+
+def create_user_token(username, is_admin=False):
+    if not is_admin:
+        serializer = make_user_serial()
+    else:
+        serializer = make_admin_serial()
+    return serializer.dumps({"token": username})
+
+
+def verify_token(token, is_admin=False):
+    try:
+        if not is_admin:
+            serial = make_user_serial()
+            max_age = load_conf()['user_config']['user_max_age']
+            data = serial.loads(token, max_age=max_age)
+            return data['token']
+        else:
+            serial = make_admin_serial()
+            max_age = load_conf()['user_config']['admin_max_age']
+            data = serial.loads(token, max_age=max_age)
+            return data['token']
+    except:
+        return None
+
+
+def generate_password_salt():
+    length = random.SystemRandom().randint(21, 43)
+    return os.urandom(length)
+
+
+def encrypt_password(password_str, rounds=None, salt=None):
+    if salt is None:
+        salt = generate_password_salt()
+        salt = base64.b64encode(salt)
+    if rounds is None:
+        rounds = random.SystemRandom().randint(30000, 50000)
+    if not isinstance(salt, bytes):
+        salt = salt.encode()
+    h = hashlib.pbkdf2_hmac("sha256", password_str.encode(), salt, rounds)
+    return h.hex(), salt, rounds

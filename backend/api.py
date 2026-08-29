@@ -57,6 +57,14 @@ def parse_telemetry_json(data):
     return True, None
 
 
+def validate_user_token(token, is_admin=False):
+    good_token = settings.verify_token(token, is_admin=is_admin)
+    if good_token is None:
+        return False, "Invalid token"
+    else:
+        return True, None
+
+
 conf = settings.load_conf()
 limiter = Limiter(
     app=app,
@@ -97,7 +105,17 @@ def public_home():
 @veilance_users_v1.route("/token/check", methods=["POST"])
 @veilance_admin_v1.route("/token/check", methods=["POST"])
 def check_login_token():
-    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+    data = request.get_json(force=True, silent=True) or {}
+    token = data.get("token")
+    if "admin" in request.path:
+        admin = True
+    else:
+        admin = False
+    good_token, error = validate_user_token(token, is_admin=admin)
+    if not good_token:
+        return settings.build_json_report(None, is_error=True, error_string=error)
+    else:
+        return settings.build_json_report({"ok": True})
 
 
 @veilance_public_v1.route("/leaderboard", methods=["GET"])
@@ -194,9 +212,72 @@ def user_login():
 
 @veilance_admin_v1.route("/login", methods=["POST"])
 def admin_login():
-    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+    conf = settings.load_conf()
+    data = request.get_json(silent=True, force=True) or {}
+    username = data.get("username", None)
+    password = data.get("password", None)
+    if username is None or password is None:
+        return settings.build_json_report(None, is_error=True, error_string="Username and password are required")
+    real_admin_username = conf['user_config']['admin_credentials']['username']
+    real_admin_password_hash = conf['user_config']['admin_credentials']['password']
+    admin_password_salt = conf['user_config']['admin_credentials']['salt']
+    admin_password_rounds = conf['user_config']['admin_credentials']['hash_rounds']
+    if username != real_admin_username:
+        return settings.build_json_report(None, is_error=True, error_string="Invalid login")
+    sent_password_hash, i, x = settings.encrypt_password(password, rounds=admin_password_rounds, salt=admin_password_salt)
+    if sent_password_hash != real_admin_password_hash:
+        return settings.build_json_report(None, is_error=True, error_string="Invalid login")
+    else:
+        token = settings.create_user_token(username, is_admin=True)
+        return settings.build_json_report({"token": token}, is_error=False)
 
 
-@veilance_admin_v1.route("/payout", methods=["POST"])
-def admin_perform_payout():
-    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+@veilance_admin_v1.route("/telemetry/view", methods=["POST"])
+def get_telemetry():
+    data = request.get_json(silent=True, force=True) or {}
+    token = data.get("token", None)
+    if token is None:
+        return settings.build_json_report(None, is_error=True, error_string="Token is required")
+    good_token, error = validate_user_token(token, is_admin=True)
+    if not good_token:
+        return settings.build_json_report(None, is_error=True, error_string=error)
+    telemetry = sql.get_all_active_telemetry()
+    return settings.build_json_report({"telemetry": telemetry})
+
+
+@veilance_admin_v1.route("/telemetry/accept", methods=["POST"])
+def accept_telemetry():
+    data = request.get_json(silent=True, force=True) or {}
+    token = data.get("token", None)
+    if token is None:
+        return settings.build_json_report(None, is_error=True, error_string="Token is required")
+    good_token, error = validate_user_token(token, is_admin=True)
+    if not good_token:
+        return settings.build_json_report(None, is_error=True, error_string=error)
+    telemetry_id = data.get("telemetry_id", None)
+    if telemetry_id is None:
+        return settings.build_json_report(None, is_error=True, error_string="Telemetry ID is required")
+    payout_amount = data.get("payout_amount", "10")
+    is_accepted = sql.accept_telemetry(telemetry_id, payout_amount)
+    if not is_accepted:
+        return settings.build_json_report(None, is_error=True, error_string="Failed to accept telemetry")
+    return settings.build_json_report({"ok": True})
+
+
+@veilance_admin_v1.route("/telemetry/deny", methods=["POST"])
+def deny_telemetry():
+    data = request.get_json(silent=True, force=True) or {}
+    token = data.get("token", None)
+    if token is None:
+        return settings.build_json_report(None, is_error=True, error_string="Token is required")
+    good_token, error = validate_user_token(token, is_admin=True)
+    if not good_token:
+        return settings.build_json_report(None, is_error=True, error_string=error)
+    reason = data.get("reason", "N/A")
+    telemetry_id = data.get("telemetry_id", None)
+    if telemetry_id is None:
+        return settings.build_json_report(None, is_error=True, error_string="Telemetry ID is required")
+    is_rejected = sql.deny_telemetry(telemetry_id, reason)
+    if not is_rejected:
+        return settings.build_json_report(None, is_error=True, error_string="Unable to reject telemetry")
+    return settings.build_json_report({"ok": True})
