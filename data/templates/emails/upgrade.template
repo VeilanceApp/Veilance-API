@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <title>Welcome to Veilance Premium</title>
+
+  <!-- Subject: Welcome to Veilance Premium -->
+  <!-- Preheader: Your account has been upgraded. Start using Verity AI and expanded tools. -->
+
+  <style>
+    @media screen and (max-width:620px) {
+      .email-shell { width:100% !important; }
+      .mobile-pad { padding-left:24px !important; padding-right:24px !important; }
+      .hero-title { font-size:36px !important; line-height:1.12 !important; }
+    }
+  </style>
+</head>
+
+<body style="margin:0;padding:0;background-color:#070c0f;color:#e9f1f1;font-family:Arial,Helvetica,sans-serif;">
+
+<div style="display:none!important;max-height:0;max-width:0;overflow:hidden;opacity:0;color:transparent;font-size:1px;line-height:1px;">
+  Your Veilance account has been upgraded. Premium features are now available.
+</div>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#070c0f" style="border-collapse:collapse;background-color:#070c0f;">
+<tr>
+<td align="center" style="padding:28px 12px 44px;">
+
+<table role="presentation" class="email-shell" cellpadding="0" cellspacing="0" border="0" width="600" bgcolor="#0b1317"
+style="width:600px;max-width:100%;border-collapse:collapse;background-color:#0b1317;border:1px solid #243b42;">
+
+<!-- HEADER -->
+<tr>
+<td class="mobile-pad" bgcolor="#050b0e" style="padding:22px 36px;border-bottom:1px solid #1e353c;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+
+<td style="color:#edf6f5;font-size:17px;font-weight:700;letter-spacing:2px;">
+<span style="color:#4bc5d1;">//</span>&nbsp;VEILANCE
+</td>
+
+<td align="right" style="color:#829ba0;font-family:Consolas,Menlo,monospace;font-size:10px;letter-spacing:1px;">
+PREMIUM ACTIVE
+</td>
+
+</tr>
+</table>
+
+</td>
+</tr>
+
+
+<!-- INTRO -->
+<tr>
+<td class="mobile-pad" style="padding:48px 44px 30px;">
+
+<p style="margin:0 0 16px;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:11px;font-weight:700;letter-spacing:2px;">
+// UPGRADE COMPLETE
+</p>
+
+<h1 class="hero-title" style="margin:0 0 20px;color:#e9f1f1;font-size:44px;font-weight:700;letter-spacing:-1.5px;line-height:1.08;">
+Welcome to Veilance Premium.
+</h1>
+
+<p style="margin:0 0 16px;color:#b9cacd;font-size:17px;line-height:1.6;">
+Your account has been upgraded successfully. Premium features are now available.
+</p>
+
+<p style="margin:0;color:#b9cacd;font-size:15px;line-height:1.7;">
+You can now go beyond browser observations and use additional intelligence tools to better understand the privacy behavior of websites.
+</p>
+
+</td>
+</tr>
+
+
+<!-- FEATURES -->
+<tr>
+<td class="mobile-pad" style="padding:0 44px 28px;">
+
+<table role="presentation" width="100%" bgcolor="#101d22"
+style="border-collapse:collapse;background-color:#101d22;border:1px solid #3b5961;border-left:3px solid #4bc5d1;">
+
+<tr>
+<td style="padding:23px 24px 10px;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:11px;font-weight:700;letter-spacing:1.7px;">
+// NOW AVAILABLE
+</td>
+</tr>
+
+<tr>
+<td style="padding:0 24px 22px;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+
+<tr>
+<td width="35" style="padding:12px 0;color:#4bc5d1;font-family:Consolas,Menlo,monospace;">
+01
+</td>
+
+<td style="padding:12px 0;color:#e9f1f1;font-size:14px;line-height:21px;">
+Chat with <strong>Verity AI</strong> for privacy analysis and questions.
+</td>
+</tr>
+
+
+<tr>
+<td width="35" style="padding:12px 0;border-top:1px solid #243b42;color:#4bc5d1;font-family:Consolas,Menlo,monospace;">
+02
+</td>
+
+<td style="padding:12px 0;border-top:1px solid #243b42;color:#e9f1f1;font-size:14px;line-height:21px;">
+Perform <strong>domain searches</strong> and investigate websites.
+</td>
+</tr>
+
+
+<tr>
+<td width="35" style="padding:12px 0;border-top:1px solid #243b42;color:#4bc5d1;font-family:Consolas,Menlo,monospace;">
+03
+</td>
+
+<td style="padding:12px 0;border-top:1px solid #243b42;color:#e9f1f1;font-size:14px;line-height:21px;">
+Access expanded <strong>API capabilities</strong> for your workflows.
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+
+<!-- CTA -->
+<tr>
+<td align="center" class="mobile-pad" style="padding:0 44px 32px;">
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td bgcolor="#08798a" style="background-color:#08798a;border:1px solid #4bc5d1;">
+
+<a href="!!BASE_URL!!/dashboard/index.html"
+style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">
+Open Veilance
+</a>
+
+</td>
+</tr>
+</table>
+
+<p style="margin:14px 0 0;color:#829ba0;font-size:11px;">
+Start exploring your new Premium features.
+</p>
+
+</td>
+</tr>
+
+
+<!-- MESSAGE -->
+<tr>
+<td class="mobile-pad" style="padding:25px 44px 30px;border-top:1px solid #243b42;">
+
+<p style="margin:0 0 10px;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:11px;font-weight:700;letter-spacing:1.7px;">
+// THANK YOU FOR SUPPORTING VEILANCE
+</p>
+
+<p style="margin:0;color:#b9cacd;font-size:14px;line-height:1.65;">
+Your subscription helps us continue building tools that make the hidden behavior of the web easier to understand.
+</p>
+
+</td>
+</tr>
+
+
+<!-- FOOTER -->
+<tr>
+<td class="mobile-pad" bgcolor="#050b0e" style="padding:22px 44px 25px;border-top:1px solid #1e353c;">
+
+<p style="margin:0 0 12px;color:#829ba0;font-family:Consolas,Menlo,monospace;font-size:11px;">
+BEYOND THE FINE PRINT.
+</p>
+
+<p style="margin:0 0 7px;color:#829ba0;font-size:11px;line-height:1.7;">
+You received this email because your Veilance account was upgraded.
+</p>
+
+<p style="margin:0;color:#829ba0;font-size:11px;line-height:1.7;">
+Veilance, a Revix Technologies company
+&nbsp;&middot;&nbsp;
+<a href="https://veilance.org/privacy" style="color:#75d7df;text-decoration:underline;">
+Privacy policy
+</a>
+</p>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
