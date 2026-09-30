@@ -226,9 +226,9 @@ def public_home():
         "documentation_link": "https://github.com/VeilanceApp/Veilance-API",
         "description": "Shared opt-in intelligence network from the Veilance browser extension",
         "install_links": {
-            "firefox": None,
+            "firefox": "https://addons.mozilla.org/en-US/firefox/addon/veilance/",
             "chromium": "https://chromewebstore.google.com/detail/veilance/jnpdghabfaeceighkogelpmaeplcmddb?hl=en&authuser=2",
-            "edge": None
+            "edge": "https://microsoftedge.microsoft.com/addons/detail/veilance/bjkaboijedghpmalbcdbodeifdlilfgg"
         },
         "status": "online"
     })
