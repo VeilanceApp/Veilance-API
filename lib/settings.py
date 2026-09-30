@@ -6,11 +6,28 @@ import uuid
 import hashlib
 import ipaddress
 import datetime
+import string
+
+import geoip2.errors
+import geoip2.database
+
+from dns.resolver import query
+from email.utils import parseaddr
 
 from itsdangerous import URLSafeTimedSerializer
 
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
+PRIVACY_POLICY_PROMPT = f"{os.getcwd()}{os.path.sep}data{os.path.sep}prompts{os.path.sep}privacy_policy.prompt"
+VERITY_CHAT_PROMPT = f"{os.getcwd()}{os.path.sep}data{os.path.sep}prompts{os.path.sep}verity_chat.prompt"
+MAIL_TEMPLATES = {
+    "welcome": f"{os.getcwd()}{os.path.sep}data{os.path.sep}templates{os.path.sep}emails{os.path.sep}welcome.template",
+    "verification": f"{os.getcwd()}{os.path.sep}data{os.path.sep}templates{os.path.sep}emails{os.path.sep}verify.template",
+    "upgrade": f"{os.getcwd()}{os.path.sep}data{os.path.sep}templates{os.path.sep}emails{os.path.sep}upgrade.template",
+}
+BAD_PASSWORDS_LIST = f"{os.getcwd()}{os.path.sep}data{os.path.sep}databases{os.path.sep}bad_passwords.lst"
+TELEMETRY_BLACKLIST = f"{os.getcwd()}{os.path.sep}data{os.path.sep}databases{os.path.sep}telemetry_blacklist.json"
+GEO2LITE_COUNTRY_DATABASE = f"{os.getcwd()}{os.path.sep}data{os.path.sep}databases{os.path.sep}GeoLite2-City.mmdb"
 
 
 def load_conf():
@@ -21,6 +38,9 @@ def build_id(**kwargs):
     is_req_id = kwargs.get("is_req_id", False)
     is_error_id = kwargs.get("is_error_id", False)
     is_telemetry_id = kwargs.get("is_telemetry_id", False)
+    is_domain_sighting = kwargs.get("is_domain_sighting", False)
+    is_privacy_policy_analysis = kwargs.get("is_privacy_policy_analysis", False)
+    is_user_id = kwargs.get("is_user_id", False)
 
     if is_req_id:
         template = "req-"
@@ -28,6 +48,12 @@ def build_id(**kwargs):
         template = "err-"
     elif is_telemetry_id:
         template = "tlm-"
+    elif is_domain_sighting:
+        template = "dmn-"
+    elif is_privacy_policy_analysis:
+        template = "ppa-"
+    elif is_user_id:
+        template = "usr-"
     else:
         template = "vln-"
     return f"{template}{uuid.uuid4()}"
@@ -187,3 +213,109 @@ def encrypt_password(password_str, rounds=None, salt=None):
         salt = salt.encode()
     h = hashlib.pbkdf2_hmac("sha256", password_str.encode(), salt, rounds)
     return h.hex(), salt, rounds
+
+
+def verify_password_complexity(sent_password):
+    needed = {
+        "digits": {
+            "charset": string.digits,
+            "found": 0
+        },
+        "punctuation": {
+            "charset": string.punctuation,
+            "found": 0
+        },
+        "lowercase": {
+            "charset": string.ascii_lowercase,
+            "found": 0
+        },
+        "uppercase": {
+            "charset": string.ascii_uppercase,
+            "found": 0
+        }
+    }
+    if not (8 <= len(sent_password) <= 48):
+        return False, "Password must be between 8 and 48 characters"
+    for char in sent_password:
+        for key in needed.keys():
+            if char in needed[key]["charset"]:
+                needed[key]["found"] += 1
+    for key in needed.keys():
+        if needed[key]["found"] == 0:
+            return False, f"Missing at least 1 {key} character"
+    data = open(BAD_PASSWORDS_LIST).readlines()
+    for bad_password in data:
+        bad_password = bad_password.strip()
+        if bad_password == sent_password:
+            return False, "Password in list of known bad passwords"
+    return True, None
+
+
+def verify_email_address(address):
+    skip_schema = ("veilance.org", "perkinsfund.org", "securelegion.org")
+    try:
+        if "@" not in address:
+            return False
+        for item in list(skip_schema):
+            if item in address.lower():
+                return False
+        parsed = parseaddr(address)
+        if parsed == ('', ''):
+            return False
+        domain = address.split("@")[-1]
+        return bool(query(domain, "MX"))
+    except:
+        return False
+
+
+def build_verification_code():
+    alpha = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    length = 10
+    code = []
+    for _ in range(length):
+        code.append(random.SystemRandom().choice(alpha))
+    expiration_time = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(hours=3)
+    return "".join(code), expiration_time.isoformat()
+
+
+def load_blacklist():
+    return json.load(open(TELEMETRY_BLACKLIST))
+
+
+def timestamp_to_iso(timestamp):
+    if timestamp is None:
+        return None
+    else:
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc).isoformat()
+
+
+def correlate_requested_item_to_real_id(requested_item):
+    if requested_item is None:
+        return None
+    conf = load_conf()
+    products = conf['stripe']['products']
+    if requested_item.lower() not in [item.lower() for item in products.keys()]:
+        return None
+    else:
+        return products[requested_item.lower()]
+
+
+def find_ip_location(ip):
+    try:
+        with geoip2.database.Reader(GEO2LITE_COUNTRY_DATABASE) as reader:
+            response = reader.city(ip)
+            return response.country.name
+    except Exception:
+        return "Unknown"
+
+
+def create_api_key():
+    chars = string.printable
+    length = random.SystemRandom().randint(12, 27)
+    string_ = []
+    for _ in range(length):
+        string_.append(random.SystemRandom().choice(chars))
+    key_addition = str(uuid.uuid4())
+    key = f"{''.join(string_)}-{key_addition}"
+    secure_key = get_hash(key)
+    return secure_key

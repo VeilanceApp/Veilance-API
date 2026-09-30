@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <title>Welcome to Veilance</title>
+  <!-- Subject: Welcome to Veilance -->
+  <!-- Preheader: You're signed up. Take your first look beyond the fine print. -->
+  <style>
+    @media screen and (max-width: 620px) {
+      .email-shell { width: 100% !important; }
+      .mobile-pad { padding-left: 24px !important; padding-right: 24px !important; }
+      .hero-title { font-size: 36px !important; line-height: 1.12 !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#070c0f;color:#e9f1f1;font-family:Arial,Helvetica,sans-serif;">
+  <div style="display:none!important;max-height:0;max-width:0;overflow:hidden;opacity:0;color:transparent;font-size:1px;line-height:1px;">
+    You're signed up. Take your first look beyond the fine print.
+  </div>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#070c0f" style="border-collapse:collapse;background-color:#070c0f;">
+    <tr>
+      <td align="center" style="padding:28px 12px 44px;">
+        <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+        <table role="presentation" class="email-shell" cellpadding="0" cellspacing="0" border="0" width="600" bgcolor="#0b1317" style="width:600px;max-width:100%;border-collapse:collapse;background-color:#0b1317;border:1px solid #243b42;">
+          <tr>
+            <td class="mobile-pad" bgcolor="#050b0e" style="background-color:#050b0e;padding:22px 36px;border-bottom:1px solid #1e353c;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                <tr>
+                  <td align="left" valign="middle" style="color:#edf6f5;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;letter-spacing:2px;line-height:24px;">
+                    <span style="color:#4bc5d1;">//</span>&nbsp;VEILANCE
+                  </td>
+                  <td align="right" valign="middle" style="color:#829ba0;font-family:Consolas,Menlo,monospace;font-size:10px;letter-spacing:1px;line-height:18px;">BROWSER PRIVACY</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-pad" style="padding:48px 44px 30px;">
+              <p style="margin:0 0 16px;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:11px;font-weight:700;letter-spacing:2px;line-height:18px;">// YOU'RE IN</p>
+              <h1 class="hero-title" style="margin:0 0 20px;color:#e9f1f1;font-family:Arial,Helvetica,sans-serif;font-size:44px;font-weight:700;letter-spacing:-1.5px;line-height:1.08;">Welcome to Veilance.</h1>
+              <p style="margin:0 0 17px;color:#b9cacd;font-size:17px;line-height:1.6;">Thanks for joining us. The next time you visit a website, open Veilance to see the activity behind the page.</p>
+              <p style="margin:0;color:#b9cacd;font-size:15px;line-height:1.7;">You can review supported network requests, storage activity, permission access, and fingerprinting signals, then inspect the evidence behind what Veilance found.</p>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-pad" style="padding:0 44px 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#101d22" style="border-collapse:collapse;background-color:#101d22;border:1px solid #3b5961;border-left:3px solid #4bc5d1;">
+                <tr>
+                  <td style="padding:23px 24px 9px;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:11px;font-weight:700;letter-spacing:1.7px;line-height:18px;">// YOUR FIRST LOOK</td>
+                </tr>
+                <tr>
+                  <td style="padding:0 24px 23px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td valign="top" width="38" style="padding:12px 0;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:12px;line-height:21px;">01</td>
+                        <td style="padding:12px 0;color:#e9f1f1;font-size:14px;line-height:21px;">Browse a website you use regularly.</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" width="38" style="padding:12px 0;border-top:1px solid #243b42;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:12px;line-height:21px;">02</td>
+                        <td style="padding:12px 0;border-top:1px solid #243b42;color:#e9f1f1;font-size:14px;line-height:21px;">Open Veilance to see what it observed.</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" width="38" style="padding:12px 0 0;border-top:1px solid #243b42;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:12px;line-height:21px;">03</td>
+                        <td style="padding:12px 0 0;border-top:1px solid #243b42;color:#e9f1f1;font-size:14px;line-height:21px;">Review the evidence behind any signal that stands out.</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-pad" style="padding:25px 44px 29px;border-top:1px solid #243b42;background-color:#0b1317;">
+              <p style="margin:0 0 10px;color:#4bc5d1;font-family:Consolas,Menlo,monospace;font-size:11px;font-weight:700;letter-spacing:1.7px;line-height:18px;">// YOUR BROWSER, YOUR CALL</p>
+              <p style="margin:0;color:#b9cacd;font-size:14px;line-height:1.65;">Your visit observations stay in the extension by default. You can use Veilance without uploading telemetry. If you decide to contribute a sanitized snapshot, you can enable uploads separately in Settings.</p>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-pad" style="padding:0 44px 38px;">
+              <p style="margin:0;color:#e9f1f1;font-size:14px;line-height:1.6;">Thanks for joining us,<br><strong>The Veilance team</strong></p>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-pad" bgcolor="#050b0e" style="padding:22px 44px 25px;border-top:1px solid #1e353c;background-color:#050b0e;">
+              <p style="margin:0 0 12px;color:#829ba0;font-family:Consolas,Menlo,monospace;font-size:11px;line-height:1.6;">BEYOND THE FINE PRINT.</p>
+              <p style="margin:0 0 7px;color:#829ba0;font-size:11px;line-height:1.7;">You received this email because you signed up for Veilance.</p>
+              <p style="margin:0;color:#829ba0;font-size:11px;line-height:1.7;">Veilance, a Revix Technologies company &nbsp;&middot;&nbsp; <a href="https://veilance.org/privacy" style="color:#75d7df;text-decoration:underline;">Privacy policy</a></p>
+            </td>
+          </tr>
+        </table>
+        <!--[if mso]></td></tr></table><![endif]-->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

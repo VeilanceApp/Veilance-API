@@ -1,3 +1,4 @@
+import re
 import datetime
 
 import pymongo
@@ -19,6 +20,257 @@ def get_client():
         _ = client[database_conf['name']]
         return client
     except:
+        return None
+
+@sanitize("user_id", "wallet_address", "eligible", "balance_raw", "decimals", "checked_at", "slot")
+def update_user_holder_access(user_id, wallet_address, eligible, balance_raw, decimals, checked_at, slot):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['holder_access']]
+    try:
+        collection.insert_one({
+            "added_on": datetime.datetime.now(tz=datetime.timezone.utc).isoformat(),
+            "user_id": user_id,
+            "wallet_address": wallet_address,
+            "is_eligible": eligible,
+            "raw_balance": balance_raw,
+            "decimals": decimals,
+            "checked_at": checked_at,
+            "slot": slot
+        })
+        return True
+    except:
+        return False
+
+
+@sanitize("id_")
+def insert_stripe_id(id_):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['stripe']]
+    try:
+        collection.insert_one({
+            "stripe_id": id_,
+            "inserted_at": datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
+        })
+    except:
+        pass
+
+
+@sanitize("id_")
+def find_stripe_id(id_):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['stripe']]
+    try:
+        results = collection.find_one({"stripe_id": id_})
+        return results
+    except:
+        return None
+
+
+@sanitize("email", "password_hash", "salt", "password_rounds", "user_id", "verification_code", "expiration_time")
+def register_user(email, password_hash, salt, password_rounds, user_id, verification_code, expiration_time):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        collection.insert_one({
+            "user_id": user_id,
+            "email": email,
+            "password_hash": password_hash,
+            "password_salt": salt,
+            "password_rounds": password_rounds,
+            "registration_time": datetime.datetime.now(tz=datetime.timezone.utc).isoformat(),
+            "enabled_account": True,
+            "verified_account": False,
+            "verification_code": {
+                "code": verification_code,
+                "expiration_time": expiration_time
+            },
+            "plan": "free",
+            "api_key": None
+        })
+        return True
+    except:
+        return False
+
+
+@sanitize("user_id", "wallet_address")
+def save_wallet_address_verification(user_id, wallet_address):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        results = collection.update_one(
+            {"user_id": user_id},
+            {"$set": {"holder_wallet_address": wallet_address}}
+        )
+        return results.modified_count == 1
+    except:
+        return False
+
+
+@sanitize("user_id", "api_key")
+def update_user_api_key(user_id, api_key):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        results = collection.update_one(
+            {"user_id": user_id},
+            {"$set": {"api_key": api_key}}
+        )
+        return results.modified_count == 1
+    except:
+        return False
+
+
+@sanitize("email", "plan_name")
+def update_user_plan_by_email(email, plan_name):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        results = collection.update_one(
+            {"email": email},
+            {"$set": {"plan": plan_name.lower()}}
+        )
+        return results.modified_count == 1
+    except:
+        return False
+
+
+@sanitize("stripe_id", "user_id")
+def update_user_stripe_id(stripe_id, user_id):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        results = collection.update_one(
+            {"user_id": user_id},
+            {"$set": {"stripe_id": stripe_id}}
+        )
+        return results.modified_count == 1
+    except:
+        return False
+
+
+@sanitize("user_id")
+def find_stripe_id_by_user_id(user_id):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        results = collection.find_one({"user_id": user_id})
+        return results['stripe_id']
+    except:
+        return None
+
+
+@sanitize("user_id")
+def verify_user(user_id):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        results = collection.update_one(
+            {"user_id": user_id},
+            {"$set": {"verified_account": True, "verification_code": {"code": None, "expiration_time": None}}}
+        )
+        return results.modified_count == 1
+    except:
+        return False
+
+
+
+@sanitize("user_id")
+def find_user_by_user_id(user_id):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        return collection.find_one({"user_id": user_id})
+    except:
+        return None
+
+
+@sanitize("email")
+def find_user_by_email(email):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['users']]
+    try:
+        results = collection.find_one({"email": email})
+        return results
+    except:
+        return None
+
+
+@sanitize("payload", "domain_url", "privacy_policy_link")
+def insert_privacy_policy_analysis(payload, domain_url, privacy_policy_link):
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['privacy_policies']]
+    try:
+        collection.insert_one({
+            "policy_id": settings.build_id(is_privacy_policy_analysis=True),
+            "inserted_at": datetime.datetime.now(tz=datetime.timezone.utc).isoformat(),
+            "policy_raw_results": payload,
+            "associated_domain": domain_url,
+            "associated_policy_link": privacy_policy_link,
+        })
+    except:
+        pass
+
+
+@sanitize("domain")
+def find_newest_telemetry_by_domain(domain, **kwargs):
+    remove_args = kwargs.get("remove_args", False)
+    search_limit = kwargs.get("search_limit", 5)
+
+    conf = settings.load_conf()
+    client = get_client()
+    db = client[conf['database']['name']]
+    collection = db[conf['database']['collections']['telemetry']]
+    try:
+        domain = domain.strip().lower().rstrip(".")
+        escaped_domain = re.escape(domain)
+        results = collection.find({
+            "raw_json_string.observations.site.hostname": {
+                "$regex": rf"^(?:.+\.)?{escaped_domain}$",
+                "$options": "i"
+            }
+        }).sort("_id", -1).limit(search_limit)
+        if remove_args:
+            retval = []
+            for item in results:
+                ip_address = item['uploaded_from']
+                uploaded_on = item['uploaded_on']
+                ip_location = settings.find_ip_location(ip_address)
+                data = item['raw_json_string']
+                del data['contributorId']
+                data['uploaded_from'] = ip_location
+                data['uploaded_on'] = uploaded_on
+                retval.append(data)
+            results = retval
+        return results
+    except:
+        import traceback
+        traceback.print_exc()
         return None
 
 
@@ -162,7 +414,7 @@ def get_leaderboard():
                     "telemetry_count": -1
                 }
             },
-            {"$limit": 50},
+            {"$limit": 25},
             {
                 "$project": {
                     "_id": 0,
