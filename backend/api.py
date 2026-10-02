@@ -873,10 +873,10 @@ def get_paid_domain_intel(domain):
                 search = 5
         if search < 1:
             search = 5
-        elif search > 30:
-            search = 5
+        elif search > 350:
+            search = 350
     except:
-        search = 5
+        search = 350
     telemetry = sql.find_newest_telemetry_by_domain(domain, remove_args=True, search_limit=search)
     if telemetry is None:
         return settings.build_json_report(None, is_error=True, error_string="No telemetry found for this domain")

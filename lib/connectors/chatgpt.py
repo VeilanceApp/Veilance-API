@@ -8,133 +8,52 @@ conf = settings.load_conf()
 client = openai.OpenAI(api_key=conf["openai"]["api_key"])
 
 
-def normalize_telemetry_data(raw_data, privacy_policy_url=None, domain_url=None):
-    if not isinstance(raw_data, dict):
-        return {}
-
-    if isinstance(raw_data.get("telemetry_data"), dict):
-        payload = raw_data["telemetry_data"]
-    elif isinstance(raw_data.get("payload"), dict):
-        payload = raw_data["payload"]
-    else:
-        payload = raw_data
-
+def normalize_telemetry_data(raw_data, privacy_policy_url, domain_url):
+    payload = raw_data.get("payload", {})
     local = raw_data.get("local", {})
-    if not isinstance(local, dict):
-        local = {}
-
-    privacy_policy_url = (
-        privacy_policy_url
-        or raw_data.get("privacy_policy_url")
-    )
-
-    domain_url = (
-        domain_url
-        or raw_data.get("current_url")
-    )
-
-    if not domain_url:
-        site = payload.get("site", {})
-        hostname = site.get("hostname")
-
-        if hostname:
-            scheme = "https" if site.get("https", True) else "http"
-            domain_url = f"{scheme}://{hostname}"
-    observations = payload.get("observation", {})
-    if not isinstance(observations, dict):
-        observations = {}
-
-    interest = payload.get("interest", {})
-    if not isinstance(interest, dict):
-        interest = {}
-
     detections = []
-
-    for reason in interest.get("reasons", []):
-        if not isinstance(reason, dict):
-            continue
-
-        reason_id = reason.get("id")
-        if not isinstance(reason_id, str):
-            continue
-        prefix = "detection.veilance-json-detections-"
-        if not reason_id.startswith(prefix):
-            continue
+    for reason in payload.get("interest", {}).get("reasons", []):
         detections.append({
-            "type": reason_id[len(prefix):],
-            "severity": reason.get("severity"),
+            "type": reason['id'].replace("detection.veilance-json-", ""),
+            "severity": reason['severity']
         })
-    allowed_page_fields = {
-        "scriptCount",
-        "thirdPartyScriptCount",
-        "iframeCount",
-        "thirdPartyIframeCount",
-        "accessibleCookieCount",
-        "localStorageKeyCount",
-        "sessionStorageKeyCount",
-        "indexedDbCount",
-        "cacheCount",
-        "serviceWorkerControlled",
-    }
-    page_data = payload.get("page", {})
-    if not isinstance(page_data, dict):
-        page_data = {}
-    page = {
-        key: value
-        for key, value in page_data.items()
-        if key in allowed_page_fields
-    }
-    observed_at = (
-        local.get("createdAt")
-        or raw_data.get("created_at")
-        or raw_data.get("observed_at")
-        or payload.get("observedAt")
-        or payload.get("timestamp")
-    )
-
+    observations = payload.get("observation", {})
     return {
         "domain_url": domain_url,
         "privacy_policy_url": privacy_policy_url,
         "visit": {
-            "snapshot_id": (
-                payload.get("eventId")
-                or local.get("snapshotId")
-            ),
-            "observed_at": observed_at,
-            "duration_seconds": observations.get(
-                "durationSeconds", 0
-            ),
-            "extension_version": payload.get(
-                "extensionVersion"
-            ),
+            "snapshot_id": payload.get("eventId") or local.get("snapshotId"),
+            "observed_at": local.get("createdAt"),
+            "duration_seconds": observations.get("durationSeconds", 0),
+            "extension_version": payload.get("extensionVersion")
         },
         "seen_behavior": {
             "observations": {
-                "totalRequests": observations.get(
-                    "totalRequests", 0
-                ),
-                "firstPartyRequests": observations.get(
-                    "firstPartyRequests", 0
-                ),
-                "thirdPartyRequests": observations.get(
-                    "thirdPartyRequests", 0
-                ),
-            },
-            "thirdPartyHosts": payload.get(
-                "thirdPartyHosts", []
-            ),
-            "trackers": payload.get(
-                "trackers", []
-            ),
-            "signals": payload.get(
-                "signals", []
-            ),
-            "page": page,
-            "security": payload.get(
-                "security", {}
-            ),
-            "detections": detections,
+                "totalRequests": observations.get("totalRequests", 0),
+                "firstPartyRequests": observations.get("firstPartyRequests", 0),
+                "thirdPartyRequests": observations.get("thirdPartyRequests", 0)
+            }
         },
+        "thirdPartyHosts": payload.get("thirdPartyHosts", []),
+        "trackers": payload.get("trackers", []),
+        "signals": payload.get("signals", []),
+        "page": {
+            key: value
+            for key, value in payload.get("page", {}).items()
+            if key in {
+                "scriptCount",
+                "thirdPartyScriptCount",
+                "iframeCount",
+                "thirdPartyIframeCount",
+                "accessibleCookieCount",
+                "localStorageKeyCount",
+                "sessionStorageKeyCount",
+                "indexedDbCount",
+                "cacheCount",
+                "serviceWorkerControlled"
+            }
+        },
+        "detections": detections
     }
 
 
