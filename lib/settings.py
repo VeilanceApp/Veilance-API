@@ -17,7 +17,7 @@ from email.utils import parseaddr
 from itsdangerous import URLSafeTimedSerializer
 
 
-VERSION = "1.0.1.1"
+VERSION = "1.0.1.2"
 PRIVACY_POLICY_PROMPT = f"{os.getcwd()}{os.path.sep}data{os.path.sep}prompts{os.path.sep}privacy_policy.prompt"
 VERITY_CHAT_PROMPT = f"{os.getcwd()}{os.path.sep}data{os.path.sep}prompts{os.path.sep}verity_chat.prompt"
 MAIL_TEMPLATES = {
