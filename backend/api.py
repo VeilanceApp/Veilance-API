@@ -359,8 +359,27 @@ def upload_telemetry():
 
 
 @veilance_public_v1.route("/intel/domain/<domain>", methods=["GET"])
+@limiter.limit("10 per month")
 def get_free_domain_intel(domain):
-    return settings.build_json_report(None, is_error=True, error_string="Endpoint not implemented yet")
+    if not domain:
+        return settings.build_json_report(None, is_error=True, error_string="Domain is required")
+    if domain in settings.load_blacklist():
+        return settings.build_json_report(None, is_error=True, error_string="No telemetry found for this domain")
+    found_free_data = 0
+    max_free_search_amount = 10
+    total_search_amount = 350
+    telemetry = sql.find_newest_telemetry_by_domain(domain, remove_args=True, search_limit=total_search_amount)
+    results = []
+    retval = []
+    for item in telemetry:
+        if found_free_data == max_free_search_amount:
+            break
+        results.append(item)
+        found_free_data += 1
+    for item in results:
+        free_snapshot = settings.build_free_snapshot(item)
+        retval.append(free_snapshot)
+    return settings.build_json_report(retval, add_note=True, note_str="Missed out on up to 340 sessions with more details get premium access today https://veilance.org/products/")
 
 
 @veilance_users_v1.route("/wallet/verify", methods=["POST"])
@@ -782,7 +801,6 @@ def request_payment_link():
         })
 
 
-
 @veilance_users_v1.route("/payment/confirm", methods=["POST"])
 @jwt_required()
 def confirm_payment_success():
@@ -851,7 +869,6 @@ def confirm_payment_success():
     return settings.build_json_report(retval)
 
 
-
 @veilance_users_v1.route("/intel/domain/<domain>", methods=["GET"])
 @jwt_required()
 def get_paid_domain_intel(domain):
@@ -864,13 +881,13 @@ def get_paid_domain_intel(domain):
     # provide blacklist for people who need it (tl;dr: $$$)
     if domain in settings.load_blacklist():
         return settings.build_json_report(None, is_error=True, error_string="No telemetry found for this domain")
-    search = request.headers.get("x-search", "5")
+    search = request.headers.get("x-search", "350")
     try:
         if not isinstance(search, int):
             try:
                 search = int(search)
             except:
-                search = 5
+                search = 350
         if search < 1:
             search = 5
         elif search > 350:

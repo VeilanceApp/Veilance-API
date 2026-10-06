@@ -62,6 +62,8 @@ def build_id(**kwargs):
 def build_json_report(output, **kwargs):
     is_error = kwargs.get("is_error", False)
     error_string = kwargs.get("error_string", None)
+    add_note = kwargs.get("add_note", False)
+    note_str = kwargs.get("note_str", "Made with <3 by Revix Tech")
 
     report = {
         "metadata": {
@@ -69,6 +71,8 @@ def build_json_report(output, **kwargs):
             "request_id": build_id(is_req_id=True)
         }
     }
+    if add_note:
+        report["note"] = note_str
     if is_error:
         if error_string is None:
             error_string = "Unexpected error occurred, no details provided to the backend"
@@ -319,3 +323,34 @@ def create_api_key():
     key = f"{''.join(string_)}-{key_addition}"
     secure_key = get_hash(key)
     return secure_key
+
+
+def build_free_snapshot(snapshot):
+    free_snapshot = {
+        "schemaVersion": snapshot.get("schemaVersion"),
+        "batchId": snapshot.get("batchId")
+    }
+    for obs in snapshot.get("observations", []):
+        free_obs = {
+            "schemaVersion": obs.get("schemaVersion"),
+            "eventId": obs.get("eventId"),
+            "extensionVersion": obs.get("extensionVersion"),
+
+            "site": {
+                "hostname": obs.get("site", {}).get("hostname"),
+                "https": obs.get("site", {}).get("https"),
+            },
+            "observation": {
+                "durationSeconds": obs.get("observation", {}).get("durationSeconds"),
+                "totalRequests": obs.get("observation", {}).get("totalRequests"),
+                "firstPartyRequests": obs.get("observation", {}).get("firstPartyRequests"),
+                "thirdPartyRequests": obs.get("observation", {}).get("thirdPartyRequests"),
+            },
+            "interest": {
+                "score": obs.get("interest", {}).get("score"),
+                "level": obs.get("interest", {}).get("level"),
+                "eligible": obs.get("interest", {}).get("eligible"),
+            }
+        }
+        free_snapshot["session"] = free_obs
+    return free_snapshot
