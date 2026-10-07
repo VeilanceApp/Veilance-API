@@ -13,4 +13,5 @@ gunicorn \
   --access-logfile "veilance-access.log" \
   --error-logfile "veilance-error.log" \
   --pid "veilance-gunicorn.pid" \
+  --capture-output \
   wsgi:app
