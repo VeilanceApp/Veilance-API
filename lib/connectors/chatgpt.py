@@ -12,12 +12,32 @@ def normalize_telemetry_data(raw_data, privacy_policy_url=None, domain_url=None)
     if not isinstance(raw_data, dict):
         return {}
 
-    if isinstance(raw_data.get("telemetry_data"), dict):
-        payload = raw_data["telemetry_data"]
-    elif isinstance(raw_data.get("payload"), dict):
-        payload = raw_data["payload"]
-    else:
-        payload = raw_data
+    payload = raw_data
+
+    for _ in range(4):
+        if isinstance(payload.get("telemetry_data"), dict):
+            payload = payload["telemetry_data"]
+        elif isinstance(payload.get("payload"), dict):
+            payload = payload["payload"]
+        else:
+            break
+
+    if "observations" in payload:
+        snapshots = payload["observations"]
+
+        if (
+                not isinstance(snapshots, list)
+                or len(snapshots) != 1
+                or not isinstance(snapshots[0], dict)
+        ):
+            raise ValueError(
+                "Policy comparison requires exactly one telemetry snapshot"
+            )
+
+        payload = snapshots[0]
+
+    if not isinstance(payload.get("observation"), dict):
+        raise ValueError("Telemetry snapshot is missing observation data")
 
     local = raw_data.get("local", {})
     if not isinstance(local, dict):
