@@ -100,7 +100,7 @@ def validate_user_token(token, is_admin=False):
         return True, None
 
 
-def wallet_error(message):
+def wallet_error(message, _=None):
     return settings.build_json_report(None, is_error=True, error_string=message)
 
 
@@ -208,7 +208,10 @@ limiter = Limiter(
 
 @app.errorhandler(429)
 def handler_429(_):
-    return settings.build_json_report(None, is_error=True, error_string="Hit request rate limit"), 429
+    if request.endpoint == "get_free_domain_intel":
+        return settings.build_json_report(None, is_error=True, error_string="Free users are limited to 10 requests per month")
+    else:
+        return settings.build_json_report(None, is_error=True, error_string="Hit request rate limit"), 429
 
 
 @app.errorhandler(Exception)
@@ -359,7 +362,7 @@ def upload_telemetry():
 
 
 @veilance_public_v1.route("/intel/domain/<domain>", methods=["GET"])
-@limiter.limit("10 per month")
+@limiter.limit("10 per day")
 def get_free_domain_intel(domain):
     if not domain:
         return settings.build_json_report(None, is_error=True, error_string="Domain is required")
