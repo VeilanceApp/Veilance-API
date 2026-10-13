@@ -954,6 +954,20 @@ def chat_with_verify():
 
     data = request.get_json(silent=True, force=True) or {}
     message = data.get("message", None)
+
+    if "assess fingerprinting" in message or "investigate trackers" in message:
+        finder = re.compile("(?P<domain>[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+)")
+        domain = finder.findall(message)
+        if len(domain) != 0:
+            domain_data = [item for item in sql.find_newest_telemetry_by_domain(domain[0])]
+        else:
+            domain_data = []
+        if len(domain_data) != 0:
+            domain_data = domain_data[0]
+        message += (f"\n\n# VEILANCE RESULTS:\n\n{domain_data}\n\n# NOTE\n\nIf the Veilance resuls above are empty, "
+                    f"make the request yourself and see if you can find any details. Specify to the user that the "
+                    f"results were not available and you did the research yourself")
+
     response_id = data.get("response_id", None)
     if message is None:
         return settings.build_json_report(None, is_error=True, error_string="Message is required")
