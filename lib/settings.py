@@ -17,7 +17,7 @@ from email.utils import parseaddr
 from itsdangerous import URLSafeTimedSerializer
 
 
-VERSION = "1.0.1.2"
+VERSION = "1.0.2.3"
 PRIVACY_POLICY_PROMPT = f"{os.getcwd()}{os.path.sep}data{os.path.sep}prompts{os.path.sep}privacy_policy.prompt"
 VERITY_CHAT_PROMPT = f"{os.getcwd()}{os.path.sep}data{os.path.sep}prompts{os.path.sep}verity_chat.prompt"
 MAIL_TEMPLATES = {
@@ -350,7 +350,22 @@ def build_free_snapshot(snapshot):
                 "score": obs.get("interest", {}).get("score"),
                 "level": obs.get("interest", {}).get("level"),
                 "eligible": obs.get("interest", {}).get("eligible"),
-            }
+                "reasons": []
+            },
+            "thirdPartyHosts": [],
+            "trackers": [],
+            "signals": []
         }
+        for host in obs.get("thirdPartyHosts", []):
+            free_obs['thirdPartyHosts'].append({"host": host.get("host")})
+        for tracker in obs.get("trackers", []):
+            free_obs['trackers'].append({"id": tracker.get("id")})
+        tmp_signal = set()
+        for signal in obs.get("signals", []):
+            tmp_signal.add(signal.get("indicatorId"))
+        for item in list(tmp_signal):
+            free_obs['signals'].append({"indicatorId": item})
+        for reason in obs.get("interest", {}).get("reasons"):
+            free_obs['interest']['reasons'].append({"id": reason.get("id")})
         free_snapshot["session"] = free_obs
     return free_snapshot
