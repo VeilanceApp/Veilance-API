@@ -492,6 +492,9 @@ def wallet_verification():
             ),
         })
 
+    if not holder['eligible']:
+        return settings.build_json_report(None, is_error=True, error_string="Wallet is not eligible for holder access")
+
     updated = sql.update_user_holder_access(
         user_id=user_id,
         wallet_address=wallet_address,
